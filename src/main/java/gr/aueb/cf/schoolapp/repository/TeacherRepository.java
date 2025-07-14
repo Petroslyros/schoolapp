@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface TeacherRepository extends JpaRepository<Teacher,Long> {
 
-    List<Teacher> findByRegion(Long regionId);
+    List<Teacher> findByRegionId(Long regionId);
     Optional<Teacher> findByUuid(String uuid);
     Optional<Teacher> findByVat(String vat);
 
