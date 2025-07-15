@@ -27,14 +27,14 @@ public class Teacher extends AbstractEntity {
     @Column(unique = true)
     private String vat;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "region_id")
-    private Region region;
-
 
     private String firstname;
 
     private String lastname;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    private Region region;
 
     @PrePersist
     public void initializeUUID() {
