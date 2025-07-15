@@ -11,10 +11,10 @@ import java.util.Optional;
 @Repository
 public interface TeacherRepository extends JpaRepository<Teacher,Long> {
 
-    List<Teacher> findByRegionId(Long regionId);
+    List<Teacher> findByRegionId(Long id);
     Optional<Teacher> findByUuid(String uuid);
     Optional<Teacher> findByVat(String vat);
 
-    @Query("SELECT count(t) FROM Teacher t WHERE t.uuid = :uuid")
+    @Query("SELECT count(t) FROM Teacher t WHERE t.uuid = ?1")
     long getCount(String uuid);
 }
