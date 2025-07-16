@@ -2,15 +2,19 @@ package gr.aueb.cf.schoolapp.controller;
 
 import gr.aueb.cf.schoolapp.core.exceptions.EntityAlreadyExistsException;
 import gr.aueb.cf.schoolapp.core.exceptions.EntityInvalidArgumentException;
+import gr.aueb.cf.schoolapp.core.exceptions.EntityNotFoundException;
+import gr.aueb.cf.schoolapp.dto.TeacherEditDTO;
 import gr.aueb.cf.schoolapp.dto.TeacherInsertDTO;
 import gr.aueb.cf.schoolapp.dto.TeacherReadOnlyDTO;
 import gr.aueb.cf.schoolapp.mapper.Mapper;
 import gr.aueb.cf.schoolapp.model.Teacher;
 import gr.aueb.cf.schoolapp.repository.RegionRepository;
+import gr.aueb.cf.schoolapp.repository.TeacherRepository;
 import gr.aueb.cf.schoolapp.service.ITeacherService;
 import gr.aueb.cf.schoolapp.validator.TeacherInsertValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
 import org.springframework.data.domain.Page;
@@ -24,12 +28,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/school/teachers")
 @RequiredArgsConstructor
+@Slf4j
 public class TeacherController {
 
     private final ITeacherService teacherService;
     private final RegionRepository regionRepository;
     private final Mapper mapper;
     private final TeacherInsertValidator teacherInsertValidator;
+    private final TeacherRepository teacherRepository;
 
 
 
@@ -83,5 +89,42 @@ public class TeacherController {
         model.addAttribute("totalPages", teachersPage.getTotalPages());
 
         return "teachers";
+    }
+    @GetMapping("/edit/{uuid}")
+    public String showEditForm(@PathVariable String uuid, Model model) {
+        try {
+            Teacher teacher = teacherRepository.findByUuid(uuid)
+                    .orElseThrow(() -> new EntityNotFoundException("Teacher", "Teacher not found"));
+            model.addAttribute("teacherEditDTO", mapper.)
+        } catch (EntityNotFoundException e) {
+            log.error("Teacher with uuid={} not updated",uuid, e);
+            model.addAttribute("regions", regionRepository.findAll(Sort.by("name"));
+            model.addAttribute("errorMessage", e.getMessage())
+        }
+    }
+
+    @PostMapping("/edit")
+    public String updateTeacher(@Valid @ModelAttribute("teacherEditDTO") TeacherEditDTO teacherEditDTO,
+                              BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
+        Teacher updatedTeacher;
+
+       // teacherInsertValidator.validate(teacherEditDTO,bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("regions", regionRepository.findAll(Sort.by("name")));
+            return "teacher-edit-form";
+        }
+
+        try {
+            updatedTeacher = teacherService.updateTeacher(teacherEditDTO);
+            TeacherReadOnlyDTO readOnlyDTO = mapper.mapToTeacherReadOnlyDTO(updatedTeacher);
+            //redirectAttributes.addFlashAttribute("teacher", readOnlyDTO);
+            model.addAttribute("teacher",mapper.mapToTeacherReadOnlyDTO(updatedTeacher));
+            return "/school/teachers/view";
+        } catch (EntityAlreadyExistsException | EntityInvalidArgumentException | EntityNotFoundException e) {
+            model.addAttribute("regions", regionRepository.findAll(Sort.by("name")));
+            model.addAttribute("errorMessage", e.getMessage());
+            return "teacher-form";
+        }
     }
 }
