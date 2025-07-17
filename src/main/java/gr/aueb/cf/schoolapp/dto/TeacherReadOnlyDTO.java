@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
-
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,5 +22,3 @@ public class TeacherReadOnlyDTO {
     private String vat;
     private String region;
 }
-
-

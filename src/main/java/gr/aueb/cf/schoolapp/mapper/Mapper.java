@@ -13,12 +13,12 @@ public class Mapper {
     }
 
     public TeacherReadOnlyDTO mapToTeacherReadOnlyDTO(Teacher teacher) {
-        return new TeacherReadOnlyDTO(teacher.getId(), teacher.getCreatedAt(), teacher.getUpdatedAt(),teacher.getUuid(),
+        return new TeacherReadOnlyDTO(teacher.getId(), teacher.getCreatedAt(), teacher.getUpdatedAt(), teacher.getUuid(),
                 teacher.getFirstname(), teacher.getLastname(), teacher.getVat(), teacher.getRegion().getName());
     }
 
     public TeacherEditDTO mapToTeacherEditDTO(Teacher teacher) {
-        return new TeacherEditDTO(teacher.getUuid(), teacher.getFirstname(), teacher.getLastname(),teacher.getVat(),
-                teacher.getRegion().getId());
+        return new TeacherEditDTO(teacher.getUuid(), teacher.getFirstname(),
+                teacher.getLastname(), teacher.getVat(), teacher.getRegion().getId());
     }
 }

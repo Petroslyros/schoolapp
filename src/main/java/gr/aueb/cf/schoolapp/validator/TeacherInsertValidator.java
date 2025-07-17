@@ -27,16 +27,16 @@ public class TeacherInsertValidator implements Validator {
     public void validate(@NonNull Object target, @NonNull Errors errors) {
         TeacherInsertDTO teacherInsertDTO = (TeacherInsertDTO) target;
 
-        if(teacherRepository.findByVat(teacherInsertDTO.getVat()).isPresent()) {
-            log.error("Save failed for teacher with vat={}. Teacher already exists", teacherInsertDTO.getVat());
-            errors.rejectValue("vat","This teachers Vat already exists");
-        }
-
-        if(regionRepository.findById(teacherInsertDTO.getRegionId()).isEmpty()) {
-            log.error("Save failed for teacher with vat={}. Region id={} invalid.", teacherInsertDTO.getVat(),
-                    teacherInsertDTO.getRegionId());
-            errors.rejectValue("regionID", "Teachers region cannot be empty");
-        }
+//        if(teacherRepository.findByVat(teacherInsertDTO.getVat()).isPresent()) {
+//            log.error("Save failed for teacher with vat={}. Teacher already exists", teacherInsertDTO.getVat());
+//            errors.rejectValue("vat","This teachers Vat already exists");
+//        }
+//
+//        if(regionRepository.findById(teacherInsertDTO.getRegionId()).isEmpty()) {
+//            log.error("Save failed for teacher with vat={}. Region id={} invalid.", teacherInsertDTO.getVat(),
+//                    teacherInsertDTO.getRegionId());
+//            errors.rejectValue("regionID", "Teachers region cannot be empty");
+//        }
 
     }
 }
