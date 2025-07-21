@@ -14,11 +14,12 @@ import gr.aueb.cf.schoolapp.repository.TeacherRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Transaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
@@ -26,6 +27,8 @@ import java.util.Objects;
 @RequiredArgsConstructor // Lombok generates a constructor for all final fields
 @Slf4j // Lombok enables logging with 'log' variable (using SLF4J)
 public class TeacherService implements ITeacherService {
+
+    //private final Logger log = LoggerFactory.getLogger(TeacherService.class);
 
     // Dependencies injected via constructor
     private final TeacherRepository teacherRepository;
@@ -47,7 +50,7 @@ public class TeacherService implements ITeacherService {
             }
 
             // Fetch the Region by ID or throw if not found
-            Region region = regionRepository.findById(dto.getRegionId())
+            Region region = regionRepository.findById(dto.getRegionId())       //TBD CHECK FOR NULL
                     .orElseThrow(() -> new EntityInvalidArgumentException("Region", "Invalid Region id "));
 
             // Map the DTO to a Teacher entity
@@ -89,7 +92,7 @@ public class TeacherService implements ITeacherService {
 
         // Get paginated list of teachers from repository
         Page<Teacher> teacherPage = teacherRepository.findAll(pageable);
-
+        log.trace("Get paginated teachers were returned successfully with page={} and size={} ", page, size);
         // Map each Teacher entity to a TeacherReadOnlyDTO
         return teacherPage.map(mapper::mapToTeacherReadOnlyDTO);
     }
@@ -100,7 +103,7 @@ public class TeacherService implements ITeacherService {
      */
     @Override
     @Transactional(rollbackOn = Exception.class)
-    public Teacher updateTeacher(TeacherEditDTO dto) throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException {
+    public void updateTeacher(TeacherEditDTO dto) throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException {
 
         try {
             // Find the existing teacher by UUID
@@ -142,8 +145,6 @@ public class TeacherService implements ITeacherService {
             // Log success
             log.info("Teacher with vat={} updated.", dto.getVat());
 
-            // Return updated teacher
-            return teacher;
 
         } catch (EntityNotFoundException e){
             log.error("Update failed for teacher with vat={} Entity not found", dto.getVat(), e);
@@ -155,6 +156,23 @@ public class TeacherService implements ITeacherService {
 
         } catch (EntityInvalidArgumentException e) {
             log.error("Update failed for teacher with vat={} Region not found with id={}", dto.getVat(), dto.getRegionId(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public void deleteTeacherByUUID(String uuid) throws EntityNotFoundException {
+        try {
+            Teacher teacher = teacherRepository.findByUuid(uuid)
+                    .orElseThrow(() -> new EntityNotFoundException("Teacher", "Teacher with uuid " + uuid + " not found"));
+
+            teacherRepository.deleteById(teacher.getId());
+            log.info("Teacher with uuid={} deleted.", uuid);
+
+
+        } catch (EntityNotFoundException e) {
+            log.trace("Delete failed for teacher with uuid={}. Teacher not found", uuid, e);
             throw e;
         }
     }

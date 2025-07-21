@@ -77,7 +77,7 @@ public class TeacherController {
             // Add data to redirect scope (Flash attributes persist through redirect)
             redirectAttributes.addFlashAttribute("teacher", readOnlyDTO);
 
-            return "redirect:/school/teachers/view"; // Redirect to list page to avoid resubmission
+            return "redirect:/school/teachers/"; // Redirect to list page to avoid resubmission
         } catch (EntityAlreadyExistsException | EntityInvalidArgumentException e) {
             // If saving fails, return form with error message
             model.addAttribute("regions", regionRepository.findAll(Sort.by("name")));
@@ -90,7 +90,7 @@ public class TeacherController {
      * GET /school/teachers/view?page=0&size=5
      * Displays a paginated list of teachers.
      */
-    @GetMapping("/view")
+    @GetMapping
     public String getPaginatedTeachers(
             @RequestParam(defaultValue = "0") int page, // URL parameter for current page (defaults to 0)
             @RequestParam(defaultValue = "5") int size, // URL parameter for page size (defaults to 5)
@@ -152,10 +152,10 @@ public class TeacherController {
 
         try {
             // Try to update the teacher
-            updatedTeacher = teacherService.updateTeacher(teacherEditDTO);
+            teacherService.updateTeacher(teacherEditDTO);
 
             // Prepare data for the result view
-            model.addAttribute("teacher", mapper.mapToTeacherReadOnlyDTO(updatedTeacher));
+//            model.addAttribute("teacher", mapper.mapToTeacherReadOnlyDTO(updatedTeacher));
             return "/school/teachers/view"; // Display the updated list (or teacher info)
 
         } catch (EntityAlreadyExistsException | EntityInvalidArgumentException | EntityNotFoundException e) {
@@ -164,6 +164,18 @@ public class TeacherController {
             model.addAttribute("errorMessage", e.getMessage());
             return "teacher-edit-form";
         }
+    }
+    @GetMapping("/school/teachers/delete/{uuid}")
+    public String deleteTeacher(@PathVariable String uuid, Model model){
+        try {
+            teacherService.deleteTeacherByUUID(uuid);
+            return "redirect:/school/teachers";
+        } catch (EntityNotFoundException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "teachers";
+        }
+
+
     }
 }
 

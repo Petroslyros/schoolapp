@@ -15,5 +15,7 @@ public interface ITeacherService {
     //page is a generic class that contains info about the paginated page
     Page<TeacherReadOnlyDTO> getPaginatedTeachers(int page, int size);
 
-    Teacher updateTeacher(TeacherEditDTO teacherEditDTO) throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException;
+    void updateTeacher(TeacherEditDTO teacherEditDTO) throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException;
+
+    void deleteTeacherByUUID(String uuid) throws EntityNotFoundException;
 }
