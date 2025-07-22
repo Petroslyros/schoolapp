@@ -137,7 +137,6 @@ import java.util.Objects;
                 log.info("Teacher with uuid={} deleted.", uuid);
             } catch (EntityNotFoundException e) {
                 log.error("Delete failed for teacher with uuid={}. Teacher not found.", uuid, e);
-
                 // Rethrow, automatic rollback due to @Transactional
                 throw e;
             }

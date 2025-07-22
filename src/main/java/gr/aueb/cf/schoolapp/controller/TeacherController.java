@@ -114,7 +114,7 @@ public class TeacherController {
     public String updateTeacher(@Valid @ModelAttribute("teacherEditDTO") TeacherEditDTO teacherEditDTO,
                                 BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
 
-        teacherEditValidator.validate(teacherEditDTO, bindingResult);
+//        teacherEditValidator.validate(teacherEditDTO, bindingResult);
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("regions", regionRepository.findAll(Sort.by("name")));
@@ -140,13 +140,14 @@ public class TeacherController {
         }
     }
 
-    @GetMapping("/school/teachers/delete/{uuid}")
+    @GetMapping("/delete/{uuid}")
     public String deleteTeacher(@PathVariable String uuid, Model model) {
         try {
             teacherService.deleteTeacherByUUID(uuid);
             return "redirect:/school/teachers";
         } catch (EntityNotFoundException e) {
             model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("regions", regionRepository.findAll(Sort.by("name")));
             return "teachers";
         }
     }
