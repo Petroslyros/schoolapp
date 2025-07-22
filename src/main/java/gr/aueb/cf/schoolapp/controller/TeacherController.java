@@ -11,6 +11,7 @@ import gr.aueb.cf.schoolapp.model.Teacher;
 import gr.aueb.cf.schoolapp.repository.RegionRepository;
 import gr.aueb.cf.schoolapp.repository.TeacherRepository;
 import gr.aueb.cf.schoolapp.service.ITeacherService;
+import gr.aueb.cf.schoolapp.validator.TeacherEditValidator;
 import gr.aueb.cf.schoolapp.validator.TeacherInsertValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,149 +25,123 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-@Controller // Declares this class as a Spring MVC controller (handles web requests)
-@RequestMapping("/school/teachers") // Base URL path for all endpoints in this controller
-@RequiredArgsConstructor // Lombok: generates constructor for all final fields
-@Slf4j // Enables logging using SLF4J
+@Controller
+@RequestMapping("/school/teachers")
+@RequiredArgsConstructor
+@Slf4j
 public class TeacherController {
 
-    // Injected dependencies (business logic, repositories, mappers, validation)
     private final ITeacherService teacherService;
     private final RegionRepository regionRepository;
     private final TeacherRepository teacherRepository;
     private final Mapper mapper;
     private final TeacherInsertValidator teacherInsertValidator;
+    private final TeacherEditValidator teacherEditValidator;
 
-    /**
-     * GET /school/teachers/insert
-     * Display the teacher creation form.
-     */
-    @GetMapping("/insert") // Handles HTTP GET request to "/insert"
+
+//    @Autowired
+//    public TeacherController(ITeacherService teacherService, RegionRepository regionRepository, Mapper mapper) {
+//        this.teacherService = teacherService;
+//        this.regionRepository = regionRepository;
+//        this.mapper = mapper;
+//    }
+
+    @GetMapping("/insert")
     public String getTeacherForm(Model model) {
-        model.addAttribute("teacherInsertDTO", new TeacherInsertDTO()); // Empty DTO for form binding
-        model.addAttribute("regions", regionRepository.findAll(Sort.by("name"))); // Populate dropdown with sorted regions
-        return "teacher-form"; // Renders the form view (Thymeleaf, JSP, etc.)
+        model.addAttribute("teacherInsertDTO", new TeacherInsertDTO());     // model request scope
+        model.addAttribute("regions", regionRepository.findAll(Sort.by("name"))); // PagingAndSortingRepository
+        return "teacher-form";
     }
 
-    /**
-     * POST /school/teachers/insert
-     * Handle form submission to create a new teacher.
-     */
-    @PostMapping("/insert") // Handles HTTP POST request to "/insert"
+    @PostMapping("/insert")
     public String saveTeacher(@Valid @ModelAttribute("teacherInsertDTO") TeacherInsertDTO teacherInsertDTO,
                               BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
-
         Teacher savedTeacher;
 
-        // Validate teacherInsertDTO using custom validator (checks for business rules)
         teacherInsertValidator.validate(teacherInsertDTO, bindingResult);
 
-        // If there are validation errors, redisplay the form with error messages
         if (bindingResult.hasErrors()) {
             model.addAttribute("regions", regionRepository.findAll(Sort.by("name")));
-            return "teacher-form"; // Re-render the same form
+            return "teacher-form";
         }
 
         try {
-            // Try to save teacher using service layer
             savedTeacher = teacherService.saveTeacher(teacherInsertDTO);
-
-            // Convert the saved entity to a read-only DTO for display
-            TeacherReadOnlyDTO readOnlyDTO = mapper.mapToTeacherReadOnlyDTO(savedTeacher);
-
-            // Add data to redirect scope (Flash attributes persist through redirect)
-            redirectAttributes.addFlashAttribute("teacher", readOnlyDTO);
-
-            return "redirect:/school/teachers/"; // Redirect to list page to avoid resubmission
+            // If we wanted to respond with a success page with teacher details,
+            // then we would need the following in comments. Otherwise, if no success page
+            // we can just redirect to teachers view
+//            TeacherReadOnlyDTO readOnlyDTO = mapper.mapToTeacherReadOnlyDTO(savedTeacher);
+//            redirectAttributes.addFlashAttribute("teacher", readOnlyDTO);
+            return "redirect:/school/teachers";
         } catch (EntityAlreadyExistsException | EntityInvalidArgumentException e) {
-            // If saving fails, return form with error message
             model.addAttribute("regions", regionRepository.findAll(Sort.by("name")));
             model.addAttribute("errorMessage", e.getMessage());
             return "teacher-form";
         }
     }
 
-    /**
-     * GET /school/teachers/view?page=0&size=5
-     * Displays a paginated list of teachers.
-     */
+    //    @GetMapping("/view")
     @GetMapping
     public String getPaginatedTeachers(
-            @RequestParam(defaultValue = "0") int page, // URL parameter for current page (defaults to 0)
-            @RequestParam(defaultValue = "5") int size, // URL parameter for page size (defaults to 5)
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
             Model model) {
-
-        // Get paginated teacher DTOs from service
         Page<TeacherReadOnlyDTO> teachersPage = teacherService.getPaginatedTeachers(page, size);
 
-        // Pass data to the view layer
-        model.addAttribute("teachersPage", teachersPage); // The full Page object (with metadata)
-        model.addAttribute("currentPage", page); // Needed for pagination controls
+        model.addAttribute("teachersPage", teachersPage);
+        model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", teachersPage.getTotalPages());
-
-        return "teachers"; // Renders the "teachers" view (paginated list)
+        return "teachers";
     }
 
-    /**
-     * GET /school/teachers/edit/{uuid}
-     * Displays the form for editing a teacher.
-     */
-    @GetMapping("/edit/{uuid}") // {uuid} is a path variable to identify which teacher to edit
+    @GetMapping("/edit/{uuid}")
     public String showEditForm(@PathVariable String uuid, Model model) {
         try {
-            // Retrieve the teacher from the repository by UUID
             Teacher teacher = teacherRepository.findByUuid(uuid)
-                    .orElseThrow(() -> new EntityNotFoundException("Teacher", "Teacher not found"));
-
-            // Add data needed for the edit form
+                    .orElseThrow(() -> new EntityNotFoundException("Teacher", "Teacher not found")); // TBD call service
             model.addAttribute("teacherEditDTO", mapper.mapToTeacherEditDTO(teacher));
             model.addAttribute("regions", regionRepository.findAll(Sort.by("name")));
-
-            return "teacher-edit-form"; // Render the form
+            return "teacher-edit-form";
         } catch (EntityNotFoundException e) {
-            log.error("Teacher with uuid={} not updated", uuid, e);
+            log.error("Teacher with uuid={} was not found.", uuid, e);
             model.addAttribute("regions", regionRepository.findAll(Sort.by("name")));
             model.addAttribute("errorMessage", e.getMessage());
-            return "teacher-edit-form"; // Still show the form, but with an error message
+            return "teacher-edit-form";
         }
     }
 
-    /**
-     * POST /school/teachers/edit
-     * Processes the form submission to update a teacher.
-     */
     @PostMapping("/edit")
     public String updateTeacher(@Valid @ModelAttribute("teacherEditDTO") TeacherEditDTO teacherEditDTO,
-                                BindingResult bindingResult, Model model) {
+                                BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
 
-        Teacher updatedTeacher;
+        teacherEditValidator.validate(teacherEditDTO, bindingResult);
 
-        // Skipped custom validator for now, but could be added if needed
-        // teacherInsertValidator.validate(teacherInsertDTO, bindingResult);
-
-        // If validation errors exist, return to the form with errors
         if (bindingResult.hasErrors()) {
             model.addAttribute("regions", regionRepository.findAll(Sort.by("name")));
             return "teacher-edit-form";
         }
 
         try {
-            // Try to update the teacher
             teacherService.updateTeacher(teacherEditDTO);
 
-            // Prepare data for the result view
-//            model.addAttribute("teacher", mapper.mapToTeacherReadOnlyDTO(updatedTeacher));
-            return "/school/teachers/view"; // Display the updated list (or teacher info)
+            // If we wanted to respond with a success page with teacher details,
+            // then we would need the following in comments, and also need from the service to
+            // send back the updated teacher. Otherwise, if no success page
+            // we can just redirect to teachers view,
 
+            //TeacherReadOnlyDTO readOnlyDTO = mapper.mapToTeacherReadOnlyDTO(updatedTeacher);
+            //redirectAttributes.addFlashAttribute("teacher", readOnlyDTO);
+
+            return "redirect:/school/teachers";
         } catch (EntityAlreadyExistsException | EntityInvalidArgumentException | EntityNotFoundException e) {
-            // If update fails, return to the form with error
             model.addAttribute("regions", regionRepository.findAll(Sort.by("name")));
             model.addAttribute("errorMessage", e.getMessage());
             return "teacher-edit-form";
         }
     }
-    @GetMapping("/delete/{uuid}")
-    public String deleteTeacher(@PathVariable String uuid, Model model){
+
+    @GetMapping("/school/teachers/delete/{uuid}")
+    public String deleteTeacher(@PathVariable String uuid, Model model) {
         try {
             teacherService.deleteTeacherByUUID(uuid);
             return "redirect:/school/teachers";
@@ -174,8 +149,6 @@ public class TeacherController {
             model.addAttribute("errorMessage", e.getMessage());
             return "teachers";
         }
-
-
     }
 }
 
