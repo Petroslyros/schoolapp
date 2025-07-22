@@ -114,7 +114,7 @@ public class TeacherController {
     public String updateTeacher(@Valid @ModelAttribute("teacherEditDTO") TeacherEditDTO teacherEditDTO,
                                 BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
 
-//        teacherEditValidator.validate(teacherEditDTO, bindingResult);
+        teacherEditValidator.validate(teacherEditDTO, bindingResult);
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("regions", regionRepository.findAll(Sort.by("name")));
