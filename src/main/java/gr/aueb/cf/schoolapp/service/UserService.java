@@ -4,6 +4,8 @@ import gr.aueb.cf.schoolapp.core.exceptions.EntityAlreadyExistsException;
 import gr.aueb.cf.schoolapp.dto.UserInsertDTO;
 import gr.aueb.cf.schoolapp.mapper.Mapper;
 import gr.aueb.cf.schoolapp.model.User;
+import gr.aueb.cf.schoolapp.model.auth.Role;
+import gr.aueb.cf.schoolapp.repository.RoleRepository;
 import gr.aueb.cf.schoolapp.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class UserService implements IUserService{
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final Mapper mapper;
+    private final RoleRepository roleRepository;
 
 
     @Override
@@ -31,8 +34,12 @@ public class UserService implements IUserService{
                 throw new EntityAlreadyExistsException("User",
                     "User with username" +userInsertDTO.getUsername() + "already exists");
             }
+
             User user = mapper.mapToUserEntity(userInsertDTO);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+            Role role = roleRepository.findById(userInsertDTO.getRoleId()).orElse(null);
+            user.setRole(role);
             System.out.println("User" + user);
             userRepository.save(user);
             System.out.println("User" + user);

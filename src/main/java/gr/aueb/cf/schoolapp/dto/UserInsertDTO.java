@@ -25,6 +25,10 @@ public class UserInsertDTO {
             message = "The pass needs to contain at least 1 special character, 1 small digit, 1 digit without white space")
     private String password;
 
+//    @NotNull(message = "The role cannot be empty")
+//    private String role;
+
     @NotNull(message = "The role cannot be empty")
-    private String role;
+    private Long roleId;
+
 }
