@@ -33,8 +33,11 @@ public class UserService implements IUserService{
             }
             User user = mapper.mapToUserEntity(userInsertDTO);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
+            System.out.println("User" + user);
             userRepository.save(user);
+            System.out.println("User" + user);
             log.info("Save succeeded for user with username={}", userInsertDTO.getUsername());
+
 
         } catch (EntityAlreadyExistsException e) {
             log.error("Save failed for user with username={}. User already exists", userInsertDTO.getUsername(), e);

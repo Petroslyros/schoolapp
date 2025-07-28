@@ -20,6 +20,7 @@ public class UserInsertDTO {
     @Size(min = 2, max = 20, message = "THe username must be within 2 and 20 characters")
     private String username;
 
+    @NotNull(message = "The password cannot be null")
     @Pattern(regexp = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*+=])^.{8,}$",
             message = "The pass needs to contain at least 1 special character, 1 small digit, 1 digit without white space")
     private String password;
