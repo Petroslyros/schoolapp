@@ -25,6 +25,7 @@ public class UserService implements IUserService{
     @Transactional(rollbackOn = Exception.class)
     public void saveUser(UserInsertDTO userInsertDTO) throws EntityAlreadyExistsException {
 
+        System.out.println("User" + userInsertDTO.getUsername());
         try {
             if(userRepository.findByUsername(userInsertDTO.getUsername()).isPresent()) {
                 throw new EntityAlreadyExistsException("User",

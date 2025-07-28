@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
@@ -77,7 +76,7 @@
 <div class="main-content bg-gray-50 min-h-screen flex items-center justify-center p-4">
     <form th:action="@{/login}" method="POST" class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
         <!-- CSRF Token (uncomment when needed) -->
-<!--         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />-->
+        <!--         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />-->
 
         <div class="mb-6 text-center">
             <h2 class="text-2xl font-bold text-gray-800">Sign In</h2>

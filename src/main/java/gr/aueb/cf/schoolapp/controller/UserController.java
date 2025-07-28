@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class UserController {
 
-   private UserService userService;
+    private final UserService userService;
     private final UserInsertValidator userInsertValidator;
 
-    @GetMapping("/user/register")
+    @GetMapping("/users/register")
     public String getUserForm(Model model) {
         model.addAttribute("userInsertDTO", new UserInsertDTO());
         return "user-form";
@@ -49,6 +49,7 @@ public class UserController {
             model.addAttribute("errorMessage", e.getMessage());
             return "user-form";
         }
+
     }
 
 }
