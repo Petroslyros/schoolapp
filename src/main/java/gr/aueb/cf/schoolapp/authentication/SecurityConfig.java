@@ -21,7 +21,7 @@ public class SecurityConfig {
         http.
                 csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "index.html").permitAll()
+                        .requestMatchers("/", "/index.html").permitAll()
                         .requestMatchers("/school/users/register").permitAll()
                         .requestMatchers("school/teachers/insert").hasAuthority("EDIT_TEACHERS")
                         .requestMatchers(HttpMethod.GET,"school/teachers/edit/[uuid}").hasAuthority("EDIT_TEACHERS")
